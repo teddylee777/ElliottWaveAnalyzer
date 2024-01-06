@@ -6,6 +6,7 @@ class WaveRule(ABC):
     """
     base class for implementing wave rules
     """
+
     def __init__(self, name: str):
         self.name = name
         self.conditions = self.set_conditions()
@@ -290,29 +291,11 @@ class LeadingDiagonal(WaveRule):
 
         return conditions
 
-    def slope(self, x1: int, x2: int, y1: float, y2: float):
-        """
-
-        returns the slope between two data points
-
-                ^
-             y2 |                    P2
-                |                  /
-                |                /
-                |              /
-                |            /
-             y1 |          P1
-                |
-                ---------------------------------------------------->
-                           x1        x2
-
-        :param x1:
-        :param x2:
-        :param y1:
-        :param y2:
-        :return:
         """
         delta_x = x2 - x1
         delta_y = y2 - y1
 
+        if delta_x == 0:
+            return 0
         return delta_y / delta_x
+        """
