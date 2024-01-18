@@ -201,7 +201,8 @@ class LeadingDiagonal(WaveRule):
 
     def set_conditions(self):
         # condition returns TRUE -> no exit
-        conditions = {  # WAVE 2
+        conditions = {
+            # WAVE 2
             "w2_0": {
                 "waves": ["wave1", "wave2", "wave3", "wave4"],
                 "function": lambda wave1, wave2, wave3, wave4: self.slope(
@@ -320,3 +321,134 @@ class LeadingDiagonal(WaveRule):
             return 0
         else:
             return delta_y / delta_x
+
+
+class ImpulseCustom(WaveRule):
+    """
+    Rules for an impulsive wave according to
+
+    https://www.goldseiten-forum.com/attachment/113839-elliottwellentutorial-pdf/
+
+    """
+
+    def calculate_fibonacci_level(self, low, high, fib_ratio, mode="low_to_high"):
+        """
+        Calculate the Fibonacci level based on a given ratio and mode.
+
+        :param low: The low point of the wave.
+        :param high: The high point of the wave.
+        :param fib_ratio: The Fibonacci ratio to apply.
+        :param mode: The mode of calculation ('low_to_high' or 'high_to_low').
+        :return: The calculated Fibonacci level.
+        """
+        if mode == "low_to_high":
+            return low + (high - low) * fib_ratio
+        elif mode == "high_to_low":
+            return high - (high - low) * fib_ratio
+        else:
+            raise ValueError("Invalid mode. Use 'low_to_high' or 'high_to_low'.")
+
+    def set_conditions(self):
+        # condition returns TRUE -> no exit
+        conditions = {
+            # WAVE 2
+            # "w2_1": {
+            #     "waves": ["wave1", "wave2"],
+            #     "function": lambda wave1, wave2: (wave2.low > wave1.low)
+            #     and (wave2.low < wave1.low * 1.382),
+            #     "message": "wave2 는 wave1 저점보다 위에 있으며, wave1 저점의 1.382배 이하에 있어야 합니다.",
+            # },
+            "w2_1": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low
+                < self.calculate_fibonacci_level(
+                    wave1.low, wave1.high, 0.3, "high_to_low"
+                ),
+                "message": "wave2 의 되돌림이 0.3 fibonacci level 보다 높아야 합니다.",
+            },
+            # "w2_3": {
+            #     "waves": ["wave1", "wave2"],
+            #     "function": lambda wave1, wave2: 9 * wave2.duration > wave1.duration,
+            #     "message": "Wave2 is longer than 9x Wave1",
+            # },
+            # # WAVE 3
+            "w3_1": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: wave3.high > wave1.high,
+                "message": "wave3 는 wave1 고점보다 위에 있어야 합니다.",
+            },
+            "w3_2": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: wave3.diagonal_length
+                > wave1.diagonal_length * 1.62,
+                "message": "wave3 는 wave1 의 대각길이의 1.62 이상이어야 합니다.",
+            },
+            # "w3_3": {
+            #     "waves": ["wave1", "wave3"],
+            #     "function": lambda wave1, wave3: wave3.length >= wave1.length / 3.0,
+            #     "message": "Wave3 is shorter than 1/3 of Wave1",
+            # },
+            # "w3_4": {
+            #     "waves": ["wave2", "wave3"],
+            #     "function": lambda wave2, wave3: wave3.length > wave2.length,
+            #     "message": "Wave3 shorter than Wave2",
+            # },
+            # "w3_5": {
+            #     "waves": ["wave1", "wave3"],
+            #     "function": lambda wave1, wave3: 7 * wave3.duration > wave1.duration,
+            #     "message": "Wave3 more than 7 times longer than Wave1.",
+            # },
+            # WAVE 4
+            "w4_1": {
+                "waves": ["wave1", "wave2", "wave3", "wave4"],
+                "function": lambda wave1, wave2, wave3, wave4: (
+                    (wave4.diagonal_length < wave1.diagonal_length)
+                    and (wave4.diagonal_length < wave3.diagonal_length)
+                    and (wave2.diagonal_length < wave1.diagonal_length)
+                    and (wave2.diagonal_length < wave3.diagonal_length)
+                ),
+                "message": "wave4 는 wave1, wave3 보다 짧고, wave2는 wave1, wave3 보다 짧아야 합니다.",
+            },
+            "w4_2": {
+                "waves": ["wave1", "wave3", "wave4"],
+                "function": lambda wave1, wave3, wave4: (
+                    wave4.low
+                    < self.calculate_fibonacci_level(
+                        wave3.low, wave3.high, 0.24, "high_to_low"
+                    )
+                )
+                and (wave4.low > wave1.high),
+                "message": "wave3 의 피보나치 0.24 이상 그리고 wave1 고점보다 높아야 합니다.",
+            },
+            # WAVE 5
+            "w5_1": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: wave3.high < wave5.high,
+                "message": "wave5 는 wave3 고점보다 위에 있어야 합니다.",
+            },
+            "w5_2": {
+                "waves": ["wave1", "wave5"],
+                "function": lambda wave1, wave5: wave5.diagonal_length
+                > wave1.diagonal_length,
+                "message": "wave5 는 wave1 보다 길어야 합니다.",
+            },
+            "w5_3": {
+                "waves": ["wave1", "wave3", "wave5"],
+                "function": lambda wave1, wave3, wave5: (
+                    wave3.diagonal_length > wave1.diagonal_length
+                )
+                and (wave3.diagonal_length > wave5.diagonal_length),
+                "message": "wave3은 wave1, wave5 보다 길어야 합니다.",
+            },
+            "w5_4": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: (
+                    wave3.diagonal_length * 0.24
+                    < wave5.diagonal_length
+                    < wave3.diagonal_length
+                ),
+                "message": "wave5 는 wave3 대각길이의 0.24 ~ 1.0 사이에 있어야 합니다.",
+            },
+        }
+
+        return conditions
