@@ -22,9 +22,11 @@ with st.sidebar:
 
     apply_btn = st.button("조회")
 
-    log = st.empty()
+    # log = st.empty()
+    st.markdown("## Debugging")
+    show_all = st.checkbox("웨이브 패턴 전체보기", value=True)
 
-
+tab1, tab2 = st.tabs(["검출 패턴", "자격 미달"])
 if apply_btn:
     log_msg = []
     df = fdr.DataReader(stock_code, start_date, end_date).reset_index()[
@@ -65,10 +67,20 @@ if apply_btn:
                             title=str(new_option_impulse),
                         )
                         if fig:
-                            st.plotly_chart(fig)
+                            tab1.plotly_chart(fig)
                 else:
                     msg = wavepattern_up.violation
                     log_msg.append(msg)
+                    if show_all:
+                        tab2.markdown(f"#### 설명```{msg}```")
+                        fig = plot_pattern(
+                            df=df,
+                            wave_pattern=wavepattern_up,
+                            title=str(new_option_impulse),
+                        )
+                        if fig:
+                            tab2.plotly_chart(fig)
+                        tab2.markdown("----")
 
-    log_msg = "\n".join(log_msg)
-    log.markdown(f"```{log_msg}```")
+    # log_msg = "\n".join(log_msg)
+    # log.markdown(f"```{log_msg}```")
