@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
+import math
 
 
 class WaveRule(ABC):
@@ -348,6 +349,50 @@ class ImpulseCustom(WaveRule):
         else:
             raise ValueError("Invalid mode. Use 'low_to_high' or 'high_to_low'.")
 
+    # 단위 기준 정규화 (Unit Basis Normalization) 방식으로 파동의 대각선 길이를 계산하는 전체 파이썬 코드
+    def calculate_diagonal_length(
+        self, time_step, start_price, end_price, avg_time_interval, avg_price_change
+    ):
+        """주어진 파동의 데이터를 평균 시간 간격과 평균 가격 변동에 따라 정규화한 후 대각선 길이를 계산합니다."""
+        normalized_time = time_step / avg_time_interval
+        normalized_price = (end_price - start_price) / avg_price_change
+        return math.sqrt(normalized_time**2 + normalized_price**2)
+
+    def calculate_diagonals_length(self, wave1, wave2):
+        # 예제 데이터
+        # wave1 = {"time_step": 9, "start_price": 42550, "end_price": 89100}
+        # wave2 = {"time_step": 17, "start_price": 74700, "end_price": 124500}
+
+        # 평균 시간 간격과 평균 가격 변동 계산
+        avg_time_interval = (wave1.duration + wave2.duration) / 2
+        avg_price_change = (
+            (wave1.points[1] - wave1.points[0]) + (wave2.points[1] - wave2.points[0])
+        ) / 2
+
+        # 각 파동의 대각선 길이 계산
+        diagonal_length_wave1 = self.calculate_diagonal_length(
+            wave1.duration,
+            wave1.points[0],
+            wave1.points[1],
+            avg_time_interval,
+            avg_price_change,
+        )
+        diagonal_length_wave2 = self.calculate_diagonal_length(
+            wave2.duration,
+            wave2.points[0],
+            wave2.points[1],
+            avg_time_interval,
+            avg_price_change,
+        )
+        print(wave1.label, diagonal_length_wave1)
+        print(wave2.label, diagonal_length_wave2)
+        return diagonal_length_wave1, diagonal_length_wave2
+
+    def wave1_longer_than_wave2(self, wave1, wave2):
+        length1, length2 = self.calculate_diagonals_length(wave1, wave2)
+        print(length1, length2)
+        return length1 > length2
+
     def set_conditions(self):
         # condition returns TRUE -> no exit
         conditions = {
@@ -435,9 +480,11 @@ class ImpulseCustom(WaveRule):
             "w5_3": {
                 "waves": ["wave1", "wave3", "wave5"],
                 "function": lambda wave1, wave3, wave5: (
-                    wave3.diagonal_length > wave1.diagonal_length
+                    # wave3.diagonal_length > wave1.diagonal_length
+                    self.wave1_longer_than_wave2(wave3, wave1)
                 )
-                and (wave3.diagonal_length > wave5.diagonal_length),
+                # and (wave3.diagonal_length > wave5.diagonal_length),
+                and (self.wave1_longer_than_wave2(wave3, wave5)),
                 "message": "wave3은 wave1, wave5 보다 길어야 합니다.",
             },
             "w5_4": {

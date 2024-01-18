@@ -53,7 +53,8 @@ if __name__ == "__main__":
         # [2, 0, 2, 0, 0],
         # [2, 0, 3, 0, 0],
         # [2, 0, 3, 1, 1],
-        [2, 0, 3, 1, 2],
+        # [2, 0, 3, 1, 2],
+        [2, 0, 1, 0, 2],
         # [2, 0, 3, 2, 1],
         # [2, 0, 3, 2, 2],
     ]
@@ -68,23 +69,29 @@ if __name__ == "__main__":
                 if wavepattern_up.check_rule(rule):
                     if wavepattern_up in wavepatterns_up:
                         print("SKIPPING")
-                        plot_pattern(
+                        fig = plot_pattern(
                             df=df,
                             wave_pattern=wavepattern_up,
                             title=str(wave_config),
                         )
+                        if fig:
+                            fig.show()
                         continue
                     else:
                         wavepatterns_up.add(wavepattern_up)
                         print(f"{rule.name} found: {wave_config}")
-                        plot_pattern(
+                        fig = plot_pattern(
                             df=df,
                             wave_pattern=wavepattern_up,
                             title=str(wave_config),
                         )
+                        if fig:
+                            fig.show()
                 else:
-                    plot_pattern(
+                    fig = plot_pattern(
                         df=df,
                         wave_pattern=wavepattern_up,
                         title=str(wave_config),
                     )
+                    if fig:
+                        fig.show()
