@@ -1,6 +1,7 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import math
+from models import WaveTools
 
 
 class WaveRule(ABC):
@@ -332,66 +333,12 @@ class ImpulseCustom(WaveRule):
 
     """
 
-    def calculate_fibonacci_level(self, low, high, fib_ratio, mode="low_to_high"):
-        """
-        Calculate the Fibonacci level based on a given ratio and mode.
-
-        :param low: The low point of the wave.
-        :param high: The high point of the wave.
-        :param fib_ratio: The Fibonacci ratio to apply.
-        :param mode: The mode of calculation ('low_to_high' or 'high_to_low').
-        :return: The calculated Fibonacci level.
-        """
-        if mode == "low_to_high":
-            return low + (high - low) * fib_ratio
-        elif mode == "high_to_low":
-            return high - (high - low) * fib_ratio
+    def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        if fib_ratio:
+            return wave1_len > wave2_len * fib_ratio
         else:
-            raise ValueError("Invalid mode. Use 'low_to_high' or 'high_to_low'.")
-
-    # 단위 기준 정규화 (Unit Basis Normalization) 방식으로 파동의 대각선 길이를 계산하는 전체 파이썬 코드
-    def calculate_diagonal_length(
-        self, time_step, start_price, end_price, avg_time_interval, avg_price_change
-    ):
-        """주어진 파동의 데이터를 평균 시간 간격과 평균 가격 변동에 따라 정규화한 후 대각선 길이를 계산합니다."""
-        normalized_time = time_step / avg_time_interval
-        normalized_price = (end_price - start_price) / avg_price_change
-        return math.sqrt(normalized_time**2 + normalized_price**2)
-
-    def calculate_diagonals_length(self, wave1, wave2):
-        # 예제 데이터
-        # wave1 = {"time_step": 9, "start_price": 42550, "end_price": 89100}
-        # wave2 = {"time_step": 17, "start_price": 74700, "end_price": 124500}
-
-        # 평균 시간 간격과 평균 가격 변동 계산
-        avg_time_interval = (wave1.duration + wave2.duration) / 2
-        avg_price_change = (
-            (wave1.points[1] - wave1.points[0]) + (wave2.points[1] - wave2.points[0])
-        ) / 2
-
-        # 각 파동의 대각선 길이 계산
-        diagonal_length_wave1 = self.calculate_diagonal_length(
-            wave1.duration,
-            wave1.points[0],
-            wave1.points[1],
-            avg_time_interval,
-            avg_price_change,
-        )
-        diagonal_length_wave2 = self.calculate_diagonal_length(
-            wave2.duration,
-            wave2.points[0],
-            wave2.points[1],
-            avg_time_interval,
-            avg_price_change,
-        )
-        print(wave1.label, diagonal_length_wave1)
-        print(wave2.label, diagonal_length_wave2)
-        return diagonal_length_wave1, diagonal_length_wave2
-
-    def wave1_longer_than_wave2(self, wave1, wave2):
-        length1, length2 = self.calculate_diagonals_length(wave1, wave2)
-        print(length1, length2)
-        return length1 > length2
+            return wave1_len > wave2_len
 
     def set_conditions(self):
         # condition returns TRUE -> no exit
@@ -406,7 +353,7 @@ class ImpulseCustom(WaveRule):
             "w2_1": {
                 "waves": ["wave1", "wave2"],
                 "function": lambda wave1, wave2: wave2.low
-                < self.calculate_fibonacci_level(
+                < WaveTools.calculate_fibonacci_level(
                     wave1.low, wave1.high, 0.3, "high_to_low"
                 ),
                 "message": "wave2 의 되돌림이 0.3 fibonacci level 보다 높아야 합니다.",
@@ -424,8 +371,9 @@ class ImpulseCustom(WaveRule):
             },
             "w3_2": {
                 "waves": ["wave1", "wave3"],
-                "function": lambda wave1, wave3: wave3.diagonal_length
-                > wave1.diagonal_length * 1.62,
+                "function": lambda wave1, wave3: self.is_wave1_diagonal_longer_than_wave2(
+                    wave3, wave1, 1.62
+                ),
                 "message": "wave3 는 wave1 의 대각길이의 1.62 이상이어야 합니다.",
             },
             # "w3_3": {
@@ -447,10 +395,14 @@ class ImpulseCustom(WaveRule):
             "w4_1": {
                 "waves": ["wave1", "wave2", "wave3", "wave4"],
                 "function": lambda wave1, wave2, wave3, wave4: (
-                    (wave4.diagonal_length < wave1.diagonal_length)
-                    and (wave4.diagonal_length < wave3.diagonal_length)
-                    and (wave2.diagonal_length < wave1.diagonal_length)
-                    and (wave2.diagonal_length < wave3.diagonal_length)
+                    self.is_wave1_diagonal_longer_than_wave2(wave1, wave2)
+                    and self.is_wave1_diagonal_longer_than_wave2(wave1, wave4)
+                    and not self.is_wave1_diagonal_longer_than_wave2(wave2, wave3)
+                    and self.is_wave1_diagonal_longer_than_wave2(wave3, wave4)
+                    # (wave4.diagonal_length < wave1.diagonal_length)
+                    # and (wave4.diagonal_length < wave3.diagonal_length)
+                    # and (wave2.diagonal_length < wave1.diagonal_length)
+                    # and (wave2.diagonal_length < wave3.diagonal_length)
                 ),
                 "message": "wave4 는 wave1, wave3 보다 짧고, wave2는 wave1, wave3 보다 짧아야 합니다.",
             },
@@ -458,7 +410,7 @@ class ImpulseCustom(WaveRule):
                 "waves": ["wave1", "wave3", "wave4"],
                 "function": lambda wave1, wave3, wave4: (
                     wave4.low
-                    < self.calculate_fibonacci_level(
+                    < WaveTools.calculate_fibonacci_level(
                         wave3.low, wave3.high, 0.24, "high_to_low"
                     )
                 )
@@ -481,10 +433,10 @@ class ImpulseCustom(WaveRule):
                 "waves": ["wave1", "wave3", "wave5"],
                 "function": lambda wave1, wave3, wave5: (
                     # wave3.diagonal_length > wave1.diagonal_length
-                    self.wave1_longer_than_wave2(wave3, wave1)
+                    WaveTools.wave1_longer_than_wave2(wave3, wave1)
                 )
                 # and (wave3.diagonal_length > wave5.diagonal_length),
-                and (self.wave1_longer_than_wave2(wave3, wave5)),
+                and (WaveTools.wave1_longer_than_wave2(wave3, wave5)),
                 "message": "wave3은 wave1, wave5 보다 길어야 합니다.",
             },
             "w5_4": {
