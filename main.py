@@ -20,6 +20,20 @@ with st.sidebar:
 
     print(start_date, end_date, stock_code)
 
+    st.markdown(
+        """
+        - KOSPI: `KS11`
+        - KOSDAQ: `KQ11`
+        - 다우존스: `DJI`
+        - 나스닥: `IXIC`
+        - 미국종목(티커): `AAPL`
+        - 비트코인: `BTC/KRW`
+        - 달러: `USD/KRW`
+        - 미국5년만기 국채수익률: `US5YT`
+
+                """
+    )
+
     apply_btn = st.button("조회")
 
     # log = st.empty()
