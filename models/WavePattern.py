@@ -10,6 +10,7 @@ class WavePattern:
     def __init__(self, waves: list, wave_options: list = None, verbose: bool = False):
         self.__waves = waves
         self.__verbose = verbose
+        self.__violation = None
         self.degree = waves[0].degree
         self.type = str  # impulse, correction, zigzag etc
         self.wave_options = wave_options
@@ -40,22 +41,9 @@ class WavePattern:
                 wave1 = self.waves.get(conditions.get("waves")[0])
                 wave2 = self.waves.get(conditions.get("waves")[1])
                 if not function(wave1, wave2):
-                    print(rule)
-                    if rule == "w5_2":
-                        # print(
-                        #     wave1.low, wave1.high, wave1.duration, wave1.diagonal_length
-                        # )
-                        # print(
-                        #     wave2.low, wave2.high, wave2.duration, wave2.diagonal_length
-                        # )
-                        # print(wave1.diagonal_length)
-                        # print(wave2.diagonal_length)
-                        print("Diagonal test")
-                        return True
                     if self.__verbose:
-                        print(
-                            f"Rule Violation of {waverule.name} for condition {rule}: {message}"
-                        )
+                        self.__violation = f"[{waverule.name}]: {rule} / {wave1.date_start.date()}~{wave1.date_end.date()}, {wave2.date_start.date()}~{wave2.date_end.date()}/ {message}"
+                        print(self.__violation)
                     return False
 
             elif no_of_waves == 3:
@@ -65,9 +53,8 @@ class WavePattern:
 
                 if not function(wave1, wave2, wave3):
                     if self.__verbose:
-                        print(
-                            f"Rule Violation of {waverule.name} for condition {rule}: {message}"
-                        )
+                        self.__violation = f"[{waverule.name}]: {rule} / {wave1.date_start.date()}~{wave1.date_end.date()}, {wave2.date_start.date()}~{wave2.date_end.date()}, {wave3.date_start.date()}~{wave3.date_end.date()}/ {message}"
+                        print(self.__violation)
                     return False
 
             elif no_of_waves == 4:
@@ -78,9 +65,8 @@ class WavePattern:
 
                 if not function(wave1, wave2, wave3, wave4):
                     if self.__verbose:
-                        print(
-                            f"Rule Violation of {waverule.name} for condition {rule}: {message}"
-                        )
+                        self.__violation = f"[{waverule.name}]: {rule} / {wave1.date_start.date()}~{wave1.date_end.date()}, {wave2.date_start.date()}~{wave2.date_end.date()}, {wave3.date_start.date()}~{wave3.date_end.date()}, {wave4.date_start.date()}~{wave4.date_end.date()}/ {message}"
+                        print(self.__violation)
                     return False
 
             else:
@@ -89,6 +75,10 @@ class WavePattern:
                 )
 
         return True
+
+    @property
+    def violation(self) -> str:
+        return self.__violation
 
     @property
     def low(self) -> float:
