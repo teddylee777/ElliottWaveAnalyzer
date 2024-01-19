@@ -51,7 +51,7 @@ if apply_btn:
     wa = WaveAnalyzer(df=df, verbose=False)
     wave_options_impulse = WaveOptionsGeneratorCustom5(up_to=n_skip)
 
-    impulse_custom = WaveRules.ImpulseCustom("impulse_custom")
+    impulse_custom = WaveRules.ImpulseCustom("3파가 가장긴 충격파")
     rules_to_check = [impulse_custom]
 
     print(f"Start at idx: {idx_start}")
@@ -73,6 +73,7 @@ if apply_btn:
                         # print("SKIPPING")
                         continue
                     else:
+                        tab1.markdown(f"#### `[{rule.name}]` 검출되었습니다.")
                         wavepatterns_up.add(wavepattern_up)
                         print(f"{rule.name} found: {new_option_impulse.values}")
                         fig = plot_pattern(
