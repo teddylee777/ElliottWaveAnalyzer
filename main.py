@@ -33,6 +33,12 @@ with st.sidebar:
 
                 """
     )
+    algo1 = WaveRules.Impulse3WaveLongest("3파가 가장긴 충격파")
+    algo2 = WaveRules.Impulse1WaveLongest("1파가 가장긴 충격파")
+    selected_algos = [algo1, algo2]
+
+    selected = st.selectbox("알고리즘", selected_algos, format_func=lambda x: x.name)
+
     n_skip = st.number_input(label="SKIP", min_value=2, max_value=7, value=5, step=1)
     apply_btn = st.button("조회")
 
@@ -51,11 +57,10 @@ if apply_btn:
     wa = WaveAnalyzer(df=df, verbose=False)
     wave_options_impulse = WaveOptionsGeneratorCustom5(up_to=n_skip)
 
-    impulse_custom = WaveRules.ImpulseCustom("3파가 가장긴 충격파")
-    rules_to_check = [impulse_custom]
-
     print(f"Start at idx: {idx_start}")
     print(f"will run up to {wave_options_impulse.number / 1e6}M combinations.")
+
+    rules_to_check = [selected]
 
     wavepatterns_up = set()
 

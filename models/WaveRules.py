@@ -325,12 +325,9 @@ class LeadingDiagonal(WaveRule):
             return delta_y / delta_x
 
 
-class ImpulseCustom(WaveRule):
+class Impulse3WaveLongest(WaveRule):
     """
-    Rules for an impulsive wave according to
-
-    https://www.goldseiten-forum.com/attachment/113839-elliottwellentutorial-pdf/
-
+    wave3 가 가장 긴 충격파
     """
 
     def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
@@ -344,12 +341,6 @@ class ImpulseCustom(WaveRule):
         # condition returns TRUE -> no exit
         conditions = {
             # WAVE 2
-            # "w2_1": {
-            #     "waves": ["wave1", "wave2"],
-            #     "function": lambda wave1, wave2: (wave2.low > wave1.low)
-            #     and (wave2.low < wave1.low * 1.382),
-            #     "message": "wave2 는 wave1 저점보다 위에 있으며, wave1 저점의 1.382배 이하에 있어야 합니다.",
-            # },
             "w2_1": {
                 "waves": ["wave1", "wave2"],
                 "function": lambda wave1, wave2: wave2.low
@@ -358,12 +349,12 @@ class ImpulseCustom(WaveRule):
                 ),
                 "message": "wave2 의 되돌림이 0.3 fibonacci level 보다 높아야 합니다.",
             },
-            # "w2_3": {
-            #     "waves": ["wave1", "wave2"],
-            #     "function": lambda wave1, wave2: 9 * wave2.duration > wave1.duration,
-            #     "message": "Wave2 is longer than 9x Wave1",
-            # },
-            # # WAVE 3
+            "w2_2": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low > wave1.low,
+                "message": "wave2 의 저점이 wave1 의 저점보다 높아야 합니다.",
+            },
+            # WAVE 3
             "w3_1": {
                 "waves": ["wave1", "wave3"],
                 "function": lambda wave1, wave3: wave3.high > wave1.high,
@@ -376,21 +367,6 @@ class ImpulseCustom(WaveRule):
                 ),
                 "message": "wave3 는 wave1 의 대각길이의 1.62 이상이어야 합니다.",
             },
-            # "w3_3": {
-            #     "waves": ["wave1", "wave3"],
-            #     "function": lambda wave1, wave3: wave3.length >= wave1.length / 3.0,
-            #     "message": "Wave3 is shorter than 1/3 of Wave1",
-            # },
-            # "w3_4": {
-            #     "waves": ["wave2", "wave3"],
-            #     "function": lambda wave2, wave3: wave3.length > wave2.length,
-            #     "message": "Wave3 shorter than Wave2",
-            # },
-            # "w3_5": {
-            #     "waves": ["wave1", "wave3"],
-            #     "function": lambda wave1, wave3: 7 * wave3.duration > wave1.duration,
-            #     "message": "Wave3 more than 7 times longer than Wave1.",
-            # },
             # WAVE 4
             "w4_1": {
                 "waves": ["wave1", "wave2", "wave3", "wave4"],
@@ -399,10 +375,6 @@ class ImpulseCustom(WaveRule):
                     and self.is_wave1_diagonal_longer_than_wave2(wave1, wave4)
                     and not self.is_wave1_diagonal_longer_than_wave2(wave2, wave3)
                     and self.is_wave1_diagonal_longer_than_wave2(wave3, wave4)
-                    # (wave4.diagonal_length < wave1.diagonal_length)
-                    # and (wave4.diagonal_length < wave3.diagonal_length)
-                    # and (wave2.diagonal_length < wave1.diagonal_length)
-                    # and (wave2.diagonal_length < wave3.diagonal_length)
                 ),
                 "message": "wave4 는 wave1, wave3 보다 짧고, wave2는 wave1, wave3 보다 짧아야 합니다.",
             },
@@ -432,10 +404,8 @@ class ImpulseCustom(WaveRule):
             "w5_3": {
                 "waves": ["wave1", "wave3", "wave5"],
                 "function": lambda wave1, wave3, wave5: (
-                    # wave3.diagonal_length > wave1.diagonal_length
                     WaveTools.wave1_longer_than_wave2(wave3, wave1)
                 )
-                # and (wave3.diagonal_length > wave5.diagonal_length),
                 and (WaveTools.wave1_longer_than_wave2(wave3, wave5)),
                 "message": "wave3은 wave1, wave5 보다 길어야 합니다.",
             },
@@ -448,6 +418,138 @@ class ImpulseCustom(WaveRule):
                 ),
                 "message": "wave5 는 wave3 대각길이의 0.24 ~ 1.0 사이에 있어야 합니다.",
             },
+        }
+
+        return conditions
+
+
+class Impulse1WaveLongest(WaveRule):
+    """
+    wave1 이 가장 긴 충격파
+    """
+
+    def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        if fib_ratio:
+            return wave1_len > wave2_len * fib_ratio
+        else:
+            return wave1_len > wave2_len
+
+    def is_wave1_diagonal_shorter_than_wave2(self, wave1, wave2, fib_ratio=None):
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        if fib_ratio:
+            return wave1_len < wave2_len * fib_ratio
+        else:
+            return wave1_len < wave2_len
+
+    def set_conditions(self):
+        # condition returns TRUE -> no exit
+        conditions = {
+            # WAVE 2
+            # OK
+            "w2_1": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low
+                < WaveTools.calculate_fibonacci_level(
+                    wave1.low, wave1.high, 0.2, "high_to_low"
+                ),
+                "message": "wave2 의 되돌림이 0.2 fibonacci level 보다 높아야 합니다.",
+            },
+            # OK
+            "w2_2": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low > wave1.low,
+                "message": "wave2 의 저점이 wave1 저점보다 높아야 합니다.",
+            },
+            # WAVE 3
+            # OK
+            "w3_1": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: wave3.high > wave1.high,
+                "message": "wave3 는 wave1 고점보다 위에 있어야 합니다.",
+            },
+            # OK
+            "w3_2": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: self.is_wave1_diagonal_longer_than_wave2(
+                    wave3, wave1, 0.3
+                )
+                and self.is_wave1_diagonal_shorter_than_wave2(wave3, wave1, 0.9),
+                "message": "wave3 는 wave1 대각길이의 0.3 ~ 0.9배 사이에 있어야 합니다.",
+            },
+            # WAVE 4
+            # "w4_1": {
+            #     "waves": ["wave1", "wave2", "wave3", "wave4"],
+            #     "function": lambda wave1, wave2, wave3, wave4: (
+            #         self.is_wave1_diagonal_longer_than_wave2(wave1, wave2)
+            #         and self.is_wave1_diagonal_longer_than_wave2(wave1, wave4)
+            #         and not self.is_wave1_diagonal_longer_than_wave2(wave2, wave3)
+            #         and self.is_wave1_diagonal_longer_than_wave2(wave3, wave4)
+            #     ),
+            #     "message": "wave4 는 wave1, wave3 보다 짧고, wave2는 wave1, wave3 보다 짧아야 합니다.",
+            # },
+            # OK
+            "w4_2": {
+                "waves": ["wave1", "wave3", "wave4"],
+                "function": lambda wave1, wave3, wave4: (
+                    wave4.low
+                    < WaveTools.calculate_fibonacci_level(
+                        wave3.low, wave3.high, 0.24, "high_to_low"
+                    )
+                )
+                and (wave4.low > wave1.high),
+                "message": "wave3 의 피보나치 0.24 이상 그리고 wave1 고점보다 높아야 합니다.",
+            },
+            # OK
+            "w4_3": {
+                "waves": ["wave2", "wave4"],
+                "function": lambda wave2, wave4: self.is_wave1_diagonal_shorter_than_wave2(
+                    wave4, wave2
+                ),
+                "message": "wave4 는 wave2 대각길이보다 짧아야 합니다.",
+            },
+            # WAVE 5
+            # OK
+            "w5_1": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: wave3.high < wave5.high,
+                "message": "wave5 는 wave3 고점보다 위에 있어야 합니다.",
+            },
+            # OK
+            "w5_2": {
+                "waves": ["wave1", "wave3", "wave5"],
+                "function": lambda wave1, wave3, wave5: (
+                    WaveTools.wave1_longer_than_wave2(wave1, wave3)
+                )
+                and (WaveTools.wave1_longer_than_wave2(wave1, wave5)),
+                "message": "wave1은 wave3, wave5 보다 길어야 합니다.",
+            },
+            # OK
+            "w5_3": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: self.is_wave1_diagonal_longer_than_wave2(
+                    wave5, wave3, 0.5  # wave5가 wave3 대각길이의 0.5배 이상
+                )
+                and self.is_wave1_diagonal_shorter_than_wave2(
+                    wave5, wave3, 0.9
+                ),  # wave5가 wave3 대각길이의 0.9배 이하
+                "message": "wave5 는 wave3 대각길이의 0.5 ~ 0.9배 사이에 있어야 합니다.",
+            },
+            # "w5_10": {
+            #     "waves": ["wave1", "wave5"],
+            #     "function": lambda wave1, wave5: wave5.diagonal_length
+            #     > wave1.diagonal_length,
+            #     "message": "wave5 는 wave1 보다 길어야 합니다.",
+            # },
+            # "w5_11": {
+            #     "waves": ["wave3", "wave5"],
+            #     "function": lambda wave3, wave5: (
+            #         wave3.diagonal_length * 0.24
+            #         < wave5.diagonal_length
+            #         < wave3.diagonal_length
+            #     ),
+            #     "message": "wave5 는 wave3 대각길이의 0.24 ~ 1.0 사이에 있어야 합니다.",
+            # },
         }
 
         return conditions
