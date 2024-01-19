@@ -14,9 +14,9 @@ st.title("Elliot Wave Analyzer")
 
 
 with st.sidebar:
-    start_date = st.date_input("시작일", datetime.date(2023, 10, 25))
-    end_date = st.date_input("종료일", datetime.date(2023, 12, 23))
-    stock_code = st.text_input("종목코드", "454910")
+    start_date = st.date_input("시작일", datetime.date(2022, 11, 2))
+    end_date = st.date_input("종료일", datetime.date(2023, 4, 18))
+    stock_code = st.text_input("종목코드", "272290")
 
     print(start_date, end_date, stock_code)
 
@@ -33,7 +33,7 @@ with st.sidebar:
 
                 """
     )
-
+    n_skip = st.number_input(label="SKIP", min_value=2, max_value=7, value=5, step=1)
     apply_btn = st.button("조회")
 
     # log = st.empty()
@@ -49,7 +49,7 @@ if apply_btn:
     idx_start = np.argmin(np.array(list(df["Low"])))
 
     wa = WaveAnalyzer(df=df, verbose=False)
-    wave_options_impulse = WaveOptionsGeneratorCustom5(up_to=5)
+    wave_options_impulse = WaveOptionsGeneratorCustom5(up_to=n_skip)
 
     impulse_custom = WaveRules.ImpulseCustom("impulse_custom")
     rules_to_check = [impulse_custom]
