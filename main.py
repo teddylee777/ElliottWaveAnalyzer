@@ -35,11 +35,12 @@ with st.sidebar:
     )
     algo1 = WaveRules.Impulse3WaveLongest("3파가 가장긴 충격파")
     algo2 = WaveRules.Impulse1WaveLongest("1파가 가장긴 충격파")
-    selected_algos = [algo1, algo2]
+    algo3 = WaveRules.Impulse5WaveLongest("5파가 가장긴 충격파")
+    selected_algos = [algo1, algo2, algo3]
 
     selected = st.selectbox("알고리즘", selected_algos, format_func=lambda x: x.name)
 
-    n_skip = st.number_input(label="SKIP", min_value=2, max_value=7, value=5, step=1)
+    n_skip = st.number_input(label="SKIP", min_value=2, max_value=7, value=7, step=1)
     apply_btn = st.button("조회")
 
     # log = st.empty()

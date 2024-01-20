@@ -63,7 +63,10 @@ def calculate_diagonals_length2(wave1, wave2):
     return diagonal_length_wave1, diagonal_length_wave2
 
 
-def calculate_diagonals_length(wave1, wave2):
+def calculate_diagonals_length1(wave1, wave2):
+    """
+    2024. 01. 20 이전 대각선 길이 계산 방식
+    """
     width1 = wave1.duration
     width2 = wave2.duration
 
@@ -90,6 +93,45 @@ def calculate_diagonals_length(wave1, wave2):
 
     len1 = math.sqrt(x1**2 + y1**2)
     len2 = math.sqrt(x2**2 + y2**2)
+    print(f"{wave1.label}: {len1:.2f}, {wave2.label}: {len2:.2f}")
+    if len1 > len2:
+        print(f"[{wave1.label}] 가 [{wave2.label}] 보다 {len1 / len2:.2f}배 길다.")
+    else:
+        print(f"[{wave2.label}] 가 [{wave1.label}] 보다 {len2 / len1:.2f}배 길다.")
+    return len1, len2
+
+
+def calculate_diagonals_length(wave1, wave2, x_to_y_ratio=1.8):
+    """
+    2024. 01. 20 이후 대각선 길이 계산 방식
+    """
+    width1 = wave1.duration
+    width2 = wave2.duration
+
+    height1 = abs(wave1.points[1] - wave1.points[0])
+    height2 = abs(wave2.points[1] - wave2.points[0])
+
+    low_y = min(wave1.points[0], wave1.points[1], wave2.points[0], wave2.points[1])
+    high_y = max(wave1.points[0], wave1.points[1], wave2.points[0], wave2.points[1])
+
+    max_x = max(width1, width2)
+    max_y = max(height1, height2)
+    max_height = max(height1, height2)
+
+    width1 /= max_x
+    width2 /= max_x
+    print(width1, width2)
+
+    width1 *= x_to_y_ratio
+    width2 *= x_to_y_ratio
+
+    height1 /= max_height
+    height2 /= max_height
+    print(height1, height2)
+
+    len1 = math.sqrt(width1**2 + height1**2)
+    len2 = math.sqrt(width2**2 + height2**2)
+
     print(f"{wave1.label}: {len1:.2f}, {wave2.label}: {len2:.2f}")
     if len1 > len2:
         print(f"[{wave1.label}] 가 [{wave2.label}] 보다 {len1 / len2:.2f}배 길다.")

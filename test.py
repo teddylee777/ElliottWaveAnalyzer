@@ -17,7 +17,7 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    df = fdr.DataReader("454910", "2023-10-20", "2024-01-18").reset_index()[
+    df = fdr.DataReader("272290", "2022-11-02", "2023-04-18").reset_index()[
         ["Date", "Open", "High", "Low", "Close"]
     ]
 
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     # leading_diagonal = LeadingDiagonal("leading diagonal")
     # correction = Correction("correction")
     # tdwave = TDWave("TD Wave")
-    impulse_custom = WaveRules.ImpulseCustom("impulse_custom")
+    impulse_custom = WaveRules.Impulse5WaveLongest("impulse_custom")
     # rules_to_check = [impulse, leading_diagonal, correction, tdwave]
     rules_to_check = [impulse_custom]
 
@@ -53,10 +53,11 @@ if __name__ == "__main__":
         # [2, 0, 2, 0, 0],
         # [2, 0, 3, 0, 0],
         # [2, 0, 3, 1, 1],
-        [2, 0, 3, 1, 2],
+        # [2, 0, 3, 1, 2],
         # [2, 0, 1, 0, 2],
         # [2, 0, 3, 2, 1],
         # [2, 0, 3, 2, 2],
+        [6, 2, 3, 2, 2],
     ]
 
     for wave_config in wave_configs:
