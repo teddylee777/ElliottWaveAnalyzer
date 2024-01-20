@@ -45,7 +45,7 @@ with st.sidebar:
 
     # log = st.empty()
     st.markdown("## Debugging")
-    show_all = st.checkbox("웨이브 패턴 전체보기", value=True)
+    show_all = st.checkbox("웨이브 패턴 전체보기", value=False)
 
 tab1, tab2 = st.tabs(["검출 패턴", "자격 미달"])
 if apply_btn:
