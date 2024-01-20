@@ -3,7 +3,7 @@ import FinanceDataReader as fdr
 from models.WavePattern import WavePattern
 from models import WaveRules
 from models.WaveAnalyzer import WaveAnalyzer
-from models.WaveOptions import WaveOptionsGenerator5
+from models.WaveOptions import WaveOptionsGeneratorCustom5
 from models.helpers import plot_pattern
 import pandas as pd
 import numpy as np
@@ -17,15 +17,15 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    df = fdr.DataReader("272290", "2022-11-02", "2023-04-18").reset_index()[
+    df = fdr.DataReader("273640", "2023-11-09", "2023-11-23").reset_index()[
         ["Date", "Open", "High", "Low", "Close"]
     ]
 
     idx_start = np.argmin(np.array(list(df["Low"])))
 
     wa = WaveAnalyzer(df=df, verbose=False)
-    wave_options_impulse = WaveOptionsGenerator5(
-        up_to=5
+    wave_options_impulse = WaveOptionsGeneratorCustom5(
+        up_to=8
     )  # generates WaveOptions up to [15, 15, 15, 15, 15]
 
     # impulse = Impulse("impulse")
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         # [2, 0, 1, 0, 2],
         # [2, 0, 3, 2, 1],
         # [2, 0, 3, 2, 2],
-        [6, 2, 3, 2, 2],
+        [0, 0, 0, 0, 0],
     ]
 
     for wave_config in wave_configs:

@@ -101,7 +101,7 @@ def calculate_diagonals_length1(wave1, wave2):
     return len1, len2
 
 
-def calculate_diagonals_length(wave1, wave2, x_to_y_ratio=1.8):
+def calculate_diagonals_length(wave1, wave2, x_to_y_ratio=1.7):
     """
     2024. 01. 20 이후 대각선 길이 계산 방식
     """
