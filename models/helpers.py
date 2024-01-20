@@ -77,6 +77,19 @@ def plot_pattern(df: pd.DataFrame, wave_pattern: WavePattern, title: str = ""):
     fig = go.Figure(data=[data, monowaves], layout=layout)
     fig.update(layout_xaxis_rangeslider_visible=False)
 
+    start_date = df.loc[0, "Date"].date().strftime("%Y-%m-%d")
+    end_date = df.loc[len(df) - 1, "Date"].date().strftime("%Y-%m-%d")
+
+    all_dates = pd.date_range(start_date, end_date, freq="D")
+
+    # df["Date"] 컬럼을 Python date 객체로 변환
+    df_dates = df["Date"].dt.date.values
+
+    # all_dates에서 df["Date"]에 없는 날짜 찾기
+    missing_dates = [d.date() for d in all_dates if d.date() not in df_dates]
+
+    fig.update_xaxes(rangebreaks=[dict(values=missing_dates)])
+
     return fig
 
 
