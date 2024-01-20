@@ -518,12 +518,12 @@ class Impulse1WaveLongest(WaveRule):
             "w5_3": {
                 "waves": ["wave3", "wave5"],
                 "function": lambda wave3, wave5: self.is_wave1_diagonal_longer_than_wave2(
-                    wave5, wave3, 0.5  # wave5가 wave3 대각길이의 0.5배 이상
+                    wave5, wave3, 0.1  # wave5가 wave3 대각길이의 0.1배 이상
                 )
                 and self.is_wave1_diagonal_shorter_than_wave2(
                     wave5, wave3, 0.9
                 ),  # wave5가 wave3 대각길이의 0.9배 이하
-                "message": "wave5 는 wave3 대각길이의 0.5 ~ 0.9배 사이에 있어야 합니다.",
+                "message": "wave5 는 wave3 대각길이의 0.1 ~ 0.9배 사이에 있어야 합니다.",
             },
         }
 
@@ -579,9 +579,9 @@ class Impulse5WaveLongest(WaveRule):
             "w3_2": {
                 "waves": ["wave1", "wave3"],
                 "function": lambda wave1, wave3: self.is_wave1_diagonal_longer_than_wave2(
-                    wave3, wave1, 1.24
+                    wave3, wave1, 1.1
                 ),
-                "message": "wave3 는 wave1 대각길이의 1.24배 이상이어야 합니다.",
+                "message": "wave3 는 wave1 대각길이의 1.1배 이상이어야 합니다.",
             },
             # WAVE 4
             # OK
