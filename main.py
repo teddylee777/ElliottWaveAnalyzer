@@ -40,7 +40,7 @@ with st.sidebar:
 
     selected = st.selectbox("알고리즘", selected_algos, format_func=lambda x: x.name)
 
-    n_skip = st.number_input(label="SKIP", min_value=2, max_value=7, value=7, step=1)
+    n_skip = st.number_input(label="SKIP", min_value=2, max_value=10, value=8, step=1)
     apply_btn = st.button("조회")
 
     # log = st.empty()
