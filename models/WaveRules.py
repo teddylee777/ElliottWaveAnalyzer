@@ -368,16 +368,16 @@ class Impulse3WaveLongest(WaveRule):
                 "message": "wave3 는 wave1 의 대각길이의 1.62 이상이어야 합니다.",
             },
             # WAVE 4
-            "w4_1": {
-                "waves": ["wave1", "wave2", "wave3", "wave4"],
-                "function": lambda wave1, wave2, wave3, wave4: (
-                    self.is_wave1_diagonal_longer_than_wave2(wave1, wave2)
-                    and self.is_wave1_diagonal_longer_than_wave2(wave1, wave4)
-                    and not self.is_wave1_diagonal_longer_than_wave2(wave2, wave3)
-                    and self.is_wave1_diagonal_longer_than_wave2(wave3, wave4)
-                ),
-                "message": "wave4 는 wave1, wave3 보다 짧고, wave2는 wave1, wave3 보다 짧아야 합니다.",
-            },
+            # "w4_1": {
+            #     "waves": ["wave1", "wave2", "wave3", "wave4"],
+            #     "function": lambda wave1, wave2, wave3, wave4: (
+            #         self.is_wave1_diagonal_longer_than_wave2(wave1, wave2)
+            #         and self.is_wave1_diagonal_longer_than_wave2(wave1, wave4)
+            #         and not self.is_wave1_diagonal_longer_than_wave2(wave2, wave3)
+            #         and self.is_wave1_diagonal_longer_than_wave2(wave3, wave4)
+            #     ),
+            #     "message": "wave4 는 wave1, wave3 보다 짧고, wave2는 wave1, wave3 보다 짧아야 합니다.",
+            # },
             "w4_2": {
                 "waves": ["wave1", "wave3", "wave4"],
                 "function": lambda wave1, wave3, wave4: (
