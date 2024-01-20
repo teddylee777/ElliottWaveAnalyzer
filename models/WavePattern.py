@@ -32,6 +32,7 @@ class WavePattern:
         :return: True if all WaveRules are fullfilled, False otherwise
 
         """
+        print("[checking rule] waverule.x_y_ratio: ", waverule.x_y_ratio)
         for rule, conditions in waverule.conditions.items():
             no_of_waves = len(conditions.get("waves"))
             function = conditions.get("function")
@@ -40,7 +41,7 @@ class WavePattern:
             if no_of_waves == 2:
                 wave1 = self.waves.get(conditions.get("waves")[0])
                 wave2 = self.waves.get(conditions.get("waves")[1])
-                print(wave1.label, wave2.label)
+                # print(wave1.label, wave2.label)
                 # print(wave1.diagonal_length, wave2.diagonal_length)
                 if not function(wave1, wave2):
                     if self.__verbose:

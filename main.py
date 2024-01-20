@@ -1,7 +1,7 @@
 import streamlit as st
 import FinanceDataReader as fdr
 from models.WavePattern import WavePattern
-from models import WaveRules
+from models import WaveRules, WaveTools
 from models.WaveAnalyzer import WaveAnalyzer
 from models.WaveOptions import WaveOptionsGenerator5, WaveOptionsGeneratorCustom5
 from models.helpers import plot_pattern
@@ -14,9 +14,9 @@ st.title("Elliot Wave Analyzer")
 
 
 with st.sidebar:
-    start_date = st.date_input("시작일", datetime.date(2022, 11, 2))
-    end_date = st.date_input("종료일", datetime.date(2023, 4, 18))
-    stock_code = st.text_input("종목코드", "272290")
+    start_date = st.date_input("시작일", datetime.date(2023, 11, 9))
+    end_date = st.date_input("종료일", datetime.date(2023, 11, 23))
+    stock_code = st.text_input("종목코드", "273640")
 
     print(start_date, end_date, stock_code)
 
@@ -33,14 +33,14 @@ with st.sidebar:
 
                 """
     )
-    algo1 = WaveRules.Impulse3WaveLongest("3파가 가장긴 충격파")
-    algo2 = WaveRules.Impulse1WaveLongest("1파가 가장긴 충격파")
-    algo3 = WaveRules.Impulse5WaveLongest("5파가 가장긴 충격파")
-    selected_algos = [algo1, algo2, algo3]
+    selected_algos = ["1파가 가장긴 충격파", "3파가 가장긴 충격파", "5파가 가장긴 충격파"]
 
-    selected = st.selectbox("알고리즘", selected_algos, format_func=lambda x: x.name)
+    selected = st.selectbox("알고리즘", selected_algos)
 
     n_skip = st.number_input(label="SKIP", min_value=2, max_value=10, value=8, step=1)
+    x_y_ratio = st.number_input(
+        label="X/Y 비율", min_value=1.2, max_value=2.5, value=1.7, step=0.1
+    )
     apply_btn = st.button("조회")
 
     # log = st.empty()
@@ -61,7 +61,24 @@ if apply_btn:
     print(f"Start at idx: {idx_start}")
     print(f"will run up to {wave_options_impulse.number / 1e6}M combinations.")
 
-    rules_to_check = [selected]
+    if selected == "1파가 가장긴 충격파":
+        rules_to_check = [
+            WaveRules.Impulse1WaveLongest(
+                selected, x_y_ratio=round(float(x_y_ratio), 1)
+            )
+        ]
+    elif selected == "3파가 가장긴 충격파":
+        rules_to_check = [
+            WaveRules.Impulse3WaveLongest(
+                selected, x_y_ratio=round(float(x_y_ratio), 1)
+            )
+        ]
+    elif selected == "5파가 가장긴 충격파":
+        rules_to_check = [
+            WaveRules.Impulse5WaveLongest(
+                selected, x_y_ratio=round(float(x_y_ratio), 1)
+            )
+        ]
 
     wavepatterns_up = set()
 

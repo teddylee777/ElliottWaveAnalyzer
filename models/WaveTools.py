@@ -120,19 +120,20 @@ def calculate_diagonals_length(wave1, wave2, x_to_y_ratio=1.7):
 
     width1 /= max_x
     width2 /= max_x
-    print(width1, width2)
+    # print(width1, width2)
 
     width1 *= x_to_y_ratio
     width2 *= x_to_y_ratio
 
     height1 /= max_height
     height2 /= max_height
-    print(height1, height2)
+    # print(height1, height2)
 
     len1 = math.sqrt(width1**2 + height1**2)
     len2 = math.sqrt(width2**2 + height2**2)
 
     print(f"{wave1.label}: {len1:.2f}, {wave2.label}: {len2:.2f}")
+    print("현재 설정된 비율:", x_to_y_ratio)
     if len1 > len2:
         print(f"[{wave1.label}] 가 [{wave2.label}] 보다 {len1 / len2:.2f}배 길다.")
     else:

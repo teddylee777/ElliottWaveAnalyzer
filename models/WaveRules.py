@@ -9,9 +9,18 @@ class WaveRule(ABC):
     base class for implementing wave rules
     """
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, x_y_ratio=1.7):
         self.name = name
         self.conditions = self.set_conditions()
+        self.__x_y_ratio = x_y_ratio
+
+    @property
+    def x_y_ratio(self):
+        return self.__x_y_ratio
+
+    @x_y_ratio.setter
+    def x_y_ratio(self, value):
+        self.__x_y_ratio = value
 
     @abstractmethod
     def set_conditions(self):
@@ -331,7 +340,9 @@ class Impulse3WaveLongest(WaveRule):
     """
 
     def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
-        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
         if fib_ratio:
             return wave1_len > wave2_len * fib_ratio
         else:
@@ -429,14 +440,18 @@ class Impulse1WaveLongest(WaveRule):
     """
 
     def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
-        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
         if fib_ratio:
             return wave1_len > wave2_len * fib_ratio
         else:
             return wave1_len > wave2_len
 
     def is_wave1_diagonal_shorter_than_wave2(self, wave1, wave2, fib_ratio=None):
-        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
         if fib_ratio:
             return wave1_len < wave2_len * fib_ratio
         else:
@@ -536,14 +551,19 @@ class Impulse5WaveLongest(WaveRule):
     """
 
     def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
-        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        print("is_wave1_diagonal_longer_than_wave2", self.x_y_ratio)
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
         if fib_ratio:
             return wave1_len > wave2_len * fib_ratio
         else:
             return wave1_len > wave2_len
 
     def is_wave1_diagonal_shorter_than_wave2(self, wave1, wave2, fib_ratio=None):
-        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(wave1, wave2)
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
         if fib_ratio:
             return wave1_len < wave2_len * fib_ratio
         else:

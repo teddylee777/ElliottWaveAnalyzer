@@ -60,6 +60,8 @@ if __name__ == "__main__":
         [0, 0, 0, 0, 0],
     ]
 
+    impulse_custom.x_y_ratio = 1.5
+
     for wave_config in wave_configs:
         waves_up = wa.find_impulsive_wave(idx_start=idx_start, wave_config=wave_config)
 
