@@ -407,12 +407,6 @@ class Impulse3WaveLongest(WaveRule):
                 "message": "wave5 는 wave3 고점보다 위에 있어야 합니다.",
             },
             "w5_2": {
-                "waves": ["wave1", "wave5"],
-                "function": lambda wave1, wave5: wave5.diagonal_length
-                > wave1.diagonal_length,
-                "message": "wave5 는 wave1 보다 길어야 합니다.",
-            },
-            "w5_3": {
                 "waves": ["wave1", "wave3", "wave5"],
                 "function": lambda wave1, wave3, wave5: (
                     WaveTools.wave1_longer_than_wave2(wave3, wave1)
@@ -420,7 +414,7 @@ class Impulse3WaveLongest(WaveRule):
                 and (WaveTools.wave1_longer_than_wave2(wave3, wave5)),
                 "message": "wave3은 wave1, wave5 보다 길어야 합니다.",
             },
-            "w5_4": {
+            "w5_3": {
                 "waves": ["wave3", "wave5"],
                 "function": lambda wave3, wave5: (
                     wave3.diagonal_length * 0.24
