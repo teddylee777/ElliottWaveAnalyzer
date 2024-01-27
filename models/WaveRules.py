@@ -646,3 +646,202 @@ class Impulse5WaveLongest(WaveRule):
         }
 
         return conditions
+
+
+class ExpandingDiagonal(WaveRule):
+    """
+    Expanding Diagonal
+    """
+
+    def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
+        print("is_wave1_diagonal_longer_than_wave2", self.x_y_ratio)
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
+        if fib_ratio:
+            return wave1_len > wave2_len * fib_ratio
+        else:
+            return wave1_len > wave2_len
+
+    def is_wave1_diagonal_shorter_than_wave2(self, wave1, wave2, fib_ratio=None):
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
+        if fib_ratio:
+            return wave1_len < wave2_len * fib_ratio
+        else:
+            return wave1_len < wave2_len
+
+    def set_conditions(self):
+        # condition returns TRUE -> no exit
+        conditions = {
+            # WAVE 2
+            # OK
+            "w2_1": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low
+                < WaveTools.calculate_fibonacci_level(
+                    wave1.low, wave1.high, 0.2, "high_to_low"
+                ),
+                "message": "wave2 의 되돌림이 0.2 fibonacci level 보다 높아야 합니다.",
+            },
+            # OK
+            "w2_2": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low > wave1.low,
+                "message": "wave2 의 저점이 wave1 저점보다 높아야 합니다.",
+            },
+            # WAVE 3
+            # OK
+            "w3_1": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: wave3.high > wave1.high,
+                "message": "wave3 는 wave1 고점보다 위에 있어야 합니다.",
+            },
+            # OK
+            "w3_2": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: self.is_wave1_diagonal_longer_than_wave2(
+                    wave3, wave1, 1.2
+                ),
+                "message": "wave3 는 wave1 대각길이의 1.2배 이상이어야 합니다.",
+            },
+            # WAVE 4
+            # OK
+            "w4_1": {
+                "waves": ["wave1", "wave4"],
+                "function": lambda wave1, wave4: wave4.low < wave1.high,
+                "message": "wave4의 저점이 wave1 고점보다 낮아야 합니다.(고점 이탈O)",
+            },
+            # OK
+            "w4_2": {
+                "waves": ["wave2", "wave4"],
+                "function": lambda wave2, wave4: wave4.low > wave2.low,
+                "message": "wave4의 저점이 wave2 저점보다 높아야 합니다.",
+            },
+            # OK
+            "w4_3": {
+                "waves": ["wave2", "wave4"],
+                "function": lambda wave2, wave4: self.is_wave1_diagonal_longer_than_wave2(
+                    wave4, wave2
+                ),
+                "message": "wave4은 wave2 보다 길어야 합니다.",
+            },
+            # WAVE 5
+            # OK
+            "w5_1": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: wave3.high < wave5.high,
+                "message": "wave5 는 wave3 고점보다 위에 있어야 합니다.",
+            },
+            # OK
+            "w5_2": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: self.is_wave1_diagonal_longer_than_wave2(
+                    wave5, wave3, 1.1
+                ),
+                "message": "wave5은 wave3 보다 1.1배 이상 길어야 합니다.",
+            },
+        }
+
+        return conditions
+
+
+class ContractingDiagonal(WaveRule):
+    """
+    Contracting Diagonal
+    """
+
+    def is_wave1_diagonal_longer_than_wave2(self, wave1, wave2, fib_ratio=None):
+        print("is_wave1_diagonal_longer_than_wave2", self.x_y_ratio)
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
+        if fib_ratio:
+            return wave1_len > wave2_len * fib_ratio
+        else:
+            return wave1_len > wave2_len
+
+    def is_wave1_diagonal_shorter_than_wave2(self, wave1, wave2, fib_ratio=None):
+        wave1_len, wave2_len = WaveTools.calculate_diagonals_length(
+            wave1, wave2, self.x_y_ratio
+        )
+        if fib_ratio:
+            return wave1_len < wave2_len * fib_ratio
+        else:
+            return wave1_len < wave2_len
+
+    def set_conditions(self):
+        # condition returns TRUE -> no exit
+        conditions = {
+            # WAVE 2
+            # OK
+            "w2_1": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low
+                < WaveTools.calculate_fibonacci_level(
+                    wave1.low, wave1.high, 0.2, "high_to_low"
+                ),
+                "message": "wave2 의 되돌림이 0.2 fibonacci level 보다 높아야 합니다.",
+            },
+            # OK
+            "w2_2": {
+                "waves": ["wave1", "wave2"],
+                "function": lambda wave1, wave2: wave2.low > wave1.low,
+                "message": "wave2 의 저점이 wave1 저점보다 높아야 합니다.",
+            },
+            # WAVE 3
+            # OK
+            "w3_1": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: wave3.high > wave1.high,
+                "message": "wave3 는 wave1 고점보다 위에 있어야 합니다.",
+            },
+            # OK
+            "w3_2": {
+                "waves": ["wave1", "wave3"],
+                "function": lambda wave1, wave3: self.is_wave1_diagonal_shorter_than_wave2(
+                    wave3,
+                    wave1,
+                ),
+                "message": "wave3 는 wave1 대각길이 보다 짧아야 합니다.",
+            },
+            # WAVE 4
+            # OK
+            "w4_1": {
+                "waves": ["wave1", "wave4"],
+                "function": lambda wave1, wave4: wave4.low < wave1.high,
+                "message": "wave4의 저점이 wave1 고점보다 낮아야 합니다.(고점 이탈O)",
+            },
+            # OK
+            "w4_2": {
+                "waves": ["wave2", "wave4"],
+                "function": lambda wave2, wave4: wave4.low > wave2.low,
+                "message": "wave4의 저점이 wave2 저점보다 높아야 합니다.",
+            },
+            # OK
+            "w4_3": {
+                "waves": ["wave2", "wave4"],
+                "function": lambda wave2, wave4: self.is_wave1_diagonal_shorter_than_wave2(
+                    wave4, wave2
+                ),
+                "message": "wave4은 wave2 보다 짧아야 합니다.",
+            },
+            # WAVE 5
+            # OK
+            "w5_1": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: wave3.high < wave5.high,
+                "message": "wave5 는 wave3 고점보다 위에 있어야 합니다.",
+            },
+            # OK
+            "w5_2": {
+                "waves": ["wave3", "wave5"],
+                "function": lambda wave3, wave5: self.is_wave1_diagonal_shorter_than_wave2(
+                    wave5, wave3, 0.9
+                ),
+                "message": "wave5은 wave3의 길이의 0.9배 이하이어야 합니다.",
+            },
+        }
+
+        return conditions

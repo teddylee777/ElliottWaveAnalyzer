@@ -33,7 +33,13 @@ with st.sidebar:
 
                 """
     )
-    selected_algos = ["1파가 가장긴 충격파", "3파가 가장긴 충격파", "5파가 가장긴 충격파"]
+    selected_algos = [
+        "1파가 가장긴 충격파",
+        "3파가 가장긴 충격파",
+        "5파가 가장긴 충격파",
+        "Expanding Diagonal",
+        "Contracting Diagonal",
+    ]
 
     selected = st.selectbox("알고리즘", selected_algos)
 
@@ -76,6 +82,16 @@ if apply_btn:
     elif selected == "5파가 가장긴 충격파":
         rules_to_check = [
             WaveRules.Impulse5WaveLongest(
+                selected, x_y_ratio=round(float(x_y_ratio), 1)
+            )
+        ]
+    elif selected == "Expanding Diagonal":
+        rules_to_check = [
+            WaveRules.ExpandingDiagonal(selected, x_y_ratio=round(float(x_y_ratio), 1))
+        ]
+    elif selected == "Contracting Diagonal":
+        rules_to_check = [
+            WaveRules.ContractingDiagonal(
                 selected, x_y_ratio=round(float(x_y_ratio), 1)
             )
         ]
