@@ -493,11 +493,11 @@ class Impulse1WaveLongest(WaveRule):
                 "function": lambda wave1, wave3, wave4: (
                     wave4.low
                     < WaveTools.calculate_fibonacci_level(
-                        wave3.low, wave3.high, 0.24, "high_to_low"
+                        wave3.low, wave3.high, 0.2, "high_to_low"
                     )
                 )
                 and (wave4.low > wave1.high),
-                "message": "wave3 의 피보나치 0.24 이상 그리고 wave1 고점보다 높아야 합니다.",
+                "message": "wave3 의 피보나치 0.2 이상 그리고 wave1 고점보다 높아야 합니다.",
             },
             # OK
             "w4_2": {
@@ -720,13 +720,13 @@ class ExpandingDiagonal(WaveRule):
                 "message": "wave4의 저점이 wave2 저점보다 높아야 합니다.",
             },
             # OK
-            "w4_3": {
-                "waves": ["wave2", "wave4"],
-                "function": lambda wave2, wave4: self.is_wave1_diagonal_longer_than_wave2(
-                    wave4, wave2
-                ),
-                "message": "wave4은 wave2 보다 길어야 합니다.",
-            },
+            # "w4_3": {
+            #     "waves": ["wave2", "wave4"],
+            #     "function": lambda wave2, wave4: self.is_wave1_diagonal_longer_than_wave2(
+            #         wave4, wave2
+            #     ),
+            #     "message": "wave4은 wave2 보다 길어야 합니다.",
+            # },
             # WAVE 5
             # OK
             "w5_1": {
@@ -840,7 +840,7 @@ class ContractingDiagonal(WaveRule):
                 "function": lambda wave3, wave5: self.is_wave1_diagonal_shorter_than_wave2(
                     wave5, wave3, 0.9
                 ),
-                "message": "wave5은 wave3의 길이의 0.9배 이하이어야 합니다.",
+                "message": "wave5은 wave3의 길이의 0.99배 이하이어야 합니다.",
             },
         }
 
