@@ -15,7 +15,7 @@ st.title("Elliot Wave Analyzer")
 
 with st.sidebar:
     start_date = st.date_input("시작일", datetime.date(2023, 11, 9))
-    end_date = st.date_input("종료일", datetime.date(2023, 11, 23))
+    end_date = st.date_input("종료일", datetime.date(2023, 12, 11))
     stock_code = st.text_input("종목코드", "273640")
 
     print(start_date, end_date, stock_code)
@@ -95,6 +95,7 @@ if apply_btn:
                 selected, x_y_ratio=round(float(x_y_ratio), 1)
             )
         ]
+    correction_rules_to_check = [WaveRules.Correction("correction")]
 
     wavepatterns_up = set()
 
@@ -122,6 +123,7 @@ if apply_btn:
                         )
                         if fig:
                             tab1.plotly_chart(fig)
+                        wavepatterns_up.add(wavepattern_up)
                 else:
                     msg = wavepattern_up.violation
                     log_msg.append(msg)
@@ -136,5 +138,40 @@ if apply_btn:
                             tab2.plotly_chart(fig)
                         tab2.markdown("----")
 
-    # log_msg = "\n".join(log_msg)
-    # log.markdown(f"```{log_msg}```")
+    wavepatterns_up = list(wavepatterns_up)
+    wavepatterns_down = set()
+
+    if len(wavepatterns_up) > 0:
+        # Impulse Wave 파동 검출
+        # A-B-C 파동 검출
+        for wavepattern_up in wavepatterns_up:
+            for new_option_impulse in wave_options_impulse.options_sorted:
+                waves_down = wa.find_corrective_wave(
+                    idx_start=wavepattern_up.idx_end,
+                    wave_config=new_option_impulse.values,
+                )
+                if waves_down:
+                    wavepattern_down = WavePattern(waves_down, verbose=True)
+                    for rule in correction_rules_to_check:
+                        if wavepattern_down.check_rule(rule):
+                            if wavepattern_down in wavepatterns_down:
+                                print("SKIPPING")                      
+                                continue
+                            else:
+                                wavepatterns_down.add(wavepattern_down)
+                                print(f"{rule.name} found: {new_option_impulse}")
+                                fig = plot_pattern(
+                                    df=df,
+                                    wave_pattern=wavepattern_down,
+                                    title=str(new_option_impulse),
+                                )
+                                if fig:
+                                    tab2.plotly_chart(fig)
+                        else:
+                            fig = plot_pattern(
+                                df=df,
+                                wave_pattern=wavepattern_down,
+                                title=str(new_option_impulse),
+                            )
+                            if fig:
+                                tab2.plotly_chart(fig)
