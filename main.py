@@ -14,9 +14,9 @@ st.title("Elliot Wave Analyzer")
 
 
 with st.sidebar:
-    start_date = st.date_input("시작일", datetime.date(2023, 11, 9))
-    end_date = st.date_input("종료일", datetime.date(2023, 12, 11))
-    stock_code = st.text_input("종목코드", "273640")
+    start_date = st.date_input("시작일", datetime.date(2022, 10, 9))
+    end_date = st.date_input("종료일", datetime.date(2023, 2, 10))
+    stock_code = st.text_input("종목코드", "035420")
 
     print(start_date, end_date, stock_code)
 
@@ -53,7 +53,9 @@ with st.sidebar:
     st.markdown("## Debugging")
     show_all = st.checkbox("웨이브 패턴 전체보기", value=False)
 
+
 tab1, tab2 = st.tabs(["검출 패턴", "자격 미달"])
+
 if apply_btn:
     log_msg = []
     df = fdr.DataReader(stock_code, start_date, end_date).reset_index()[
@@ -100,9 +102,7 @@ if apply_btn:
     wavepatterns_up = set()
 
     for new_option_impulse in wave_options_impulse.options_sorted:
-        waves_up = wa.find_impulsive_wave(
-            idx_start=idx_start, wave_config=new_option_impulse.values
-        )
+        waves_up = wa.find_impulsive_wave_zigzag(wave_config=new_option_impulse.values)
         # print(new_option_impulse)
         if waves_up:
             wavepattern_up = WavePattern(waves_up, verbose=True)
@@ -155,7 +155,7 @@ if apply_btn:
                     for rule in correction_rules_to_check:
                         if wavepattern_down.check_rule(rule):
                             if wavepattern_down in wavepatterns_down:
-                                print("SKIPPING")                      
+                                print("SKIPPING")
                                 continue
                             else:
                                 wavepatterns_down.add(wavepattern_down)

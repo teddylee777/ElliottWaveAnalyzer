@@ -17,7 +17,7 @@ import numpy as np
 
 
 if __name__ == "__main__":
-    df = fdr.DataReader("273640", "2023-11-09", "2023-11-23").reset_index()[
+    df = fdr.DataReader("273640", "2023-11-09", "2023-12-11").reset_index()[
         ["Date", "Open", "High", "Low", "Close"]
     ]
 
@@ -35,6 +35,7 @@ if __name__ == "__main__":
     impulse_custom = WaveRules.Impulse5WaveLongest("impulse_custom")
     # rules_to_check = [impulse, leading_diagonal, correction, tdwave]
     rules_to_check = [impulse_custom]
+    correction_rules_to_check = [WaveRules.Correction("correction")]
 
     print(f"Start at idx: {idx_start}")
     print(f"will run up to {wave_options_impulse.number / 1e6}M combinations.")
@@ -61,6 +62,8 @@ if __name__ == "__main__":
     ]
 
     impulse_custom.x_y_ratio = 1.5
+
+    wavepatterns_up = set()
 
     for wave_config in wave_configs:
         waves_up = wa.find_impulsive_wave(idx_start=idx_start, wave_config=wave_config)
@@ -98,3 +101,48 @@ if __name__ == "__main__":
                     )
                     if fig:
                         fig.show()
+
+    wavepatterns_up = list(wavepatterns_up)
+    wavepatterns_down = set()
+
+    if len(wavepatterns_up) > 0:
+        # Impulse Wave 파동 검출
+        # A-B-C 파동 검출
+        for wavepattern_up in wavepatterns_up:
+            for new_option_impulse in wave_options_impulse.options_sorted:
+                waves_down = wa.find_corrective_wave(
+                    idx_start=wavepattern_up.idx_end,
+                    wave_config=new_option_impulse.values,
+                )
+                if waves_down:
+                    wavepattern_down = WavePattern(waves_down, verbose=True)
+                    for rule in correction_rules_to_check:
+                        if wavepattern_down.check_rule(rule):
+                            if wavepattern_down in wavepatterns_down:
+                                print("SKIPPING")
+                                fig = plot_pattern(
+                                    df=df,
+                                    wave_pattern=wavepattern_down,
+                                    title=str(wave_config),
+                                )
+                                if fig:
+                                    fig.show()
+                                continue
+                            else:
+                                wavepatterns_down.add(wavepattern_down)
+                                print(f"{rule.name} found: {wave_config}")
+                                fig = plot_pattern(
+                                    df=df,
+                                    wave_pattern=wavepattern_down,
+                                    title=str(wave_config),
+                                )
+                                if fig:
+                                    fig.show()
+                        else:
+                            fig = plot_pattern(
+                                df=df,
+                                wave_pattern=wavepattern_down,
+                                title=str(wave_config),
+                            )
+                            if fig:
+                                fig.show()

@@ -2,6 +2,7 @@ from __future__ import annotations
 import numpy as np
 from models.functions import hi, lo, next_hi, next_lo
 import math
+import pandas as pd
 
 
 class MonoWave:
@@ -111,6 +112,40 @@ class MonoWave:
         else:
             raise ValueError("WavePattern other than 3 or 5 waves implemented, yet.")
 
+    @classmethod
+    def from_dataframe(cls, df: pd.DataFrame, idx: int) -> "MonoWave":
+        """
+        Class method to initialize a MonoWave instance from a DataFrame row.
+
+        :param df: DataFrame containing zigzag pattern data
+        :param idx: Row index in the DataFrame to create the MonoWave from
+        :return: An instance of MonoWave or its subclasses
+        """
+        if idx >= len(df) - 1:
+            raise ValueError("Index out of range for DataFrame")
+
+        # Assuming lows and highs are derived from the 'Low' and 'High' columns of the DataFrame
+        lows = np.array([df.iloc[idx]["Low"]])
+        highs = np.array([df.iloc[idx]["High"]])
+        dates = np.array([pd.to_datetime(df.iloc[idx]["Date"])])
+
+        # Create a dummy instance with minimal data just for demonstration
+        instance = cls(lows, highs, dates, idx_start=idx)
+        instance.date_start = dates[0]
+        instance.date_end = dates[
+            0
+        ]  # Assuming single day for simplicity; adjust as needed
+        instance.low = lows[0]
+        instance.high = highs[0]
+        instance.low_idx = idx
+        instance.high_idx = idx
+        # Adjust other properties as needed
+        instance.degree = (
+            1  # 1 = lowest timeframe level, 2 as soon as a e.g. 12345 is found etc.
+        )
+
+        return instance
+
 
 class MonoWaveUp(MonoWave):
     """
@@ -126,6 +161,38 @@ class MonoWaveUp(MonoWave):
         self.idx_end = self.high_idx
         self.date_start = self.dates_arr[self.idx_start]
         self.date_end = self.dates_arr[self.high_idx]
+
+    @classmethod
+    def from_dataframe(cls, df, idx):
+        if idx >= len(df) - 1:
+            raise IndexError("DataFrame index out of range.")
+
+        row = df.iloc[idx]
+
+        # Assuming the DataFrame structure matches your data expectation
+        indexes = np.array(row["index"])
+        lows = np.array([row["Low"]])
+        highs = np.array([row["High"]])
+        dates = np.array([pd.to_datetime(row["Date"])])
+
+        instance = cls.__new__(cls)  # Instantiate without calling __init__
+
+        # Directly set required attributes
+        instance.lows_arr = lows
+        instance.highs_arr = highs
+        instance.dates_arr = dates
+        instance.idx_start = idx
+        instance.idx_end = idx  # Assuming the end index is the same for simplicity
+        instance.date_start = dates[0]
+        instance.date_end = dates[0]  # Adjust as necessary
+        instance.low = lows[0]
+        instance.high = highs[0]
+        instance.low_idx = idx
+        instance.high_idx = idx
+        instance.skip_n = 0  # Set skip_n if necessary
+        instance.degree = 1  # Set degree if necessary
+        # Manually set any other necessary attributes
+        return instance
 
     def find_end(self):
         """
@@ -179,6 +246,41 @@ class MonoWaveDown(MonoWave):
         else:
             self.date_end = None
             self.idx_end = None
+
+    @classmethod
+    def from_dataframe(cls, df, idx):
+        if idx >= len(df) - 1:
+            raise IndexError("DataFrame index out of range.")
+
+        row = df.iloc[idx]
+        next_row = df.iloc[idx + 1] if idx + 1 < len(df) else df.iloc[idx]
+
+        # For downward waves, we assume the high is at the start and low at the end
+        # Adjust this logic based on your specific DataFrame structure
+        lows = np.array([row["Low"], next_row["Low"]])
+        highs = np.array([row["High"], next_row["High"]])
+        dates = np.array(
+            [pd.to_datetime(row["Date"]), pd.to_datetime(next_row["Date"])]
+        )
+
+        instance = cls.__new__(cls)  # Instantiate without calling __init__
+
+        # Directly set required attributes
+        instance.lows_arr = lows
+        instance.highs_arr = highs
+        instance.dates_arr = dates
+        instance.idx_start = idx
+        instance.idx_end = idx + 1  # Adjust if your logic differs
+        instance.date_start = dates[0]
+        instance.date_end = dates[-1]  # Ensure this captures the end date correctly
+        instance.low = min(lows)
+        instance.high = max(highs)
+        instance.low_idx = lows.argmin()
+        instance.high_idx = highs.argmax()
+        instance.skip_n = 0  # Set skip_n if necessary
+        instance.degree = 1  # Set degree if necessary
+        # Manually set any other necessary attributes
+        return instance
 
     @property
     def dates(self) -> list:

@@ -12,11 +12,12 @@ class WaveAnalyzer:
     Find impulse or corrective waves for given dataframe
     """
 
-    def __init__(self, df: pd.DataFrame, verbose: bool = False):
+    def __init__(self, df: pd.DataFrame, threshold=0.05, verbose: bool = False):
         self.df = df
-        self.lows = np.array(list(self.df["Low"]))
-        self.highs = np.array(list(self.df["High"]))
-        self.dates = np.array(list(self.df["Date"]))
+        self.zigzag_df = self.detect_zigzag(df, threshold)
+        self.lows = np.array(list(self.zigzag_df["Low"]))
+        self.highs = np.array(list(self.zigzag_df["High"]))
+        self.dates = np.array(list(self.zigzag_df["Date"]))
         self.verbose = verbose
 
         self.impulse_rules = list()
@@ -26,6 +27,66 @@ class WaveAnalyzer:
         self.__waveoptions_down: WaveOptionsGenerator3
 
         self.set_combinatorial_limits()
+
+    def detect_zigzag(self, df: pd.DataFrame, threshold: float) -> list[tuple]:
+        zigzag_points = []
+        last_pivot = 0
+        up_trend = True
+
+        for i in range(1, len(df)):
+            if up_trend:
+                if df["Low"].iloc[i] <= df["Low"].iloc[last_pivot]:
+                    if zigzag_points:
+                        zigzag_points.pop()
+                    zigzag_points.append(
+                        (
+                            df.index[i],
+                            df["Date"].iloc[i],
+                            df["Low"].iloc[i],
+                            df["High"].iloc[i],
+                        )
+                    )
+                    last_pivot = i
+
+                elif df["High"].iloc[i] / df["Low"].iloc[last_pivot] - 1 >= threshold:
+                    zigzag_points.append(
+                        (
+                            df.index[i],
+                            df["Date"].iloc[i],
+                            df["Low"].iloc[i],
+                            df["High"].iloc[i],
+                        )
+                    )
+                    up_trend = False
+                    last_pivot = i
+            else:
+                if df["High"].iloc[i] >= df["High"].iloc[last_pivot]:
+                    if zigzag_points:
+                        zigzag_points.pop()
+                    zigzag_points.append(
+                        (
+                            df.index[i],
+                            df["Date"].iloc[i],
+                            df["Low"].iloc[i],
+                            df["High"].iloc[i],
+                        )
+                    )
+                    last_pivot = i
+
+                elif df["High"].iloc[last_pivot] / df["Low"].iloc[i] - 1 >= threshold:
+                    zigzag_points.append(
+                        (
+                            df.index[i],
+                            df["Date"].iloc[i],
+                            df["Low"].iloc[i],
+                            df["High"].iloc[i],
+                        )
+                    )
+                    up_trend = True
+                    last_pivot = i
+
+        # return zigzag_points
+        return pd.DataFrame(zigzag_points, columns=["index", "Date", "Low", "High"])
 
     def get_absolute_low(self):
         """
@@ -45,6 +106,108 @@ class WaveAnalyzer:
         """
         self.__waveoptions_up = WaveOptionsGenerator5(n_up)
         self.__waveoptions_down = WaveOptionsGenerator3(n_down)
+
+    def find_impulsive_wave_zigzag(self, wave_config: list = None):
+        """
+        Tries to find 5 consecutive waves (up, down, up, down, up) to build an impulsive 12345 wave
+
+        :param df: dataframe from zigzag
+        :param wave_config: WaveOptions
+        :return: list of the 5 MonoWaves in case they are found.
+
+                False otherwise
+        """
+
+        if wave_config is None:
+            wave_config = [0, 0, 0, 0, 0]
+
+        if len(self.zigzag_df) < 5:
+            return False
+
+        idx_start = self.zigzag_df.iloc[0]["index"]
+
+        wave1 = MonoWaveUp(
+            lows=self.lows,
+            highs=self.highs,
+            dates=self.dates,
+            idx_start=idx_start,
+            skip=wave_config[0],
+        )
+        wave1.label = "1"
+        wave1_end = wave1.idx_end
+        if wave1_end is None:
+            if self.verbose:
+                print("Wave 1 has no End in Data")
+            return False
+
+        wave2 = MonoWaveDown(
+            lows=self.lows,
+            highs=self.highs,
+            dates=self.dates,
+            idx_start=wave1_end,
+            skip=wave_config[1],
+        )
+        wave2.label = "2"
+        wave2_end = wave2.idx_end
+        if wave2_end is None:
+            if self.verbose:
+                print("Wave 2 has no End in Data")
+            return False
+
+        wave3 = MonoWaveUp(
+            lows=self.lows,
+            highs=self.highs,
+            dates=self.dates,
+            idx_start=wave2_end,
+            skip=wave_config[2],
+        )
+        wave3.label = "3"
+        wave3_end = wave3.idx_end
+        if wave3_end is None:
+            if self.verbose:
+                print("Wave 3 has no End in Data")
+            return False
+
+        wave4 = MonoWaveDown(
+            lows=self.lows,
+            highs=self.highs,
+            dates=self.dates,
+            idx_start=wave3_end,
+            skip=wave_config[3],
+        )
+        wave4.label = "4"
+        wave4_end = wave4.idx_end
+
+        if wave4_end is None:
+            if self.verbose:
+                print("Wave 4 has no End in Data")
+            return False
+
+        lows_slice = self.lows[wave2.low_idx : wave4.low_idx]
+        if lows_slice.size > 0 and wave2.low > np.min(lows_slice):
+            return False
+
+        wave5 = MonoWaveUp(
+            lows=self.lows,
+            highs=self.highs,
+            dates=self.dates,
+            idx_start=wave4_end,
+            skip=wave_config[4],
+        )
+        wave5.label = "5"
+        wave5_end = wave5.idx_end
+        if wave5_end is None:
+            if self.verbose:
+                print("Wave 5 has no End in Data")
+            return False
+
+        lows_slice = self.lows[wave4.low_idx : wave5.high_idx]
+        if lows_slice.size > 0 and wave4.low > np.min(lows_slice):
+            if self.verbose:
+                print("Low of Wave 4 higher than a low between Wave 4 and Wave 5")
+            return False
+
+        return [wave1, wave2, wave3, wave4, wave5]
 
     def find_impulsive_wave(self, idx_start: int, wave_config: list = None):
         """
