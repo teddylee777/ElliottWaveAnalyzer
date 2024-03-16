@@ -99,12 +99,21 @@ class WaveOptions:
 
 class WaveOptionsGenerator(ABC):
     def __init__(self, up_to: int):
+        self.__up_from = 0
         self.__up_to = up_to
         self.options = self.populate()
 
     @property
     def up_to(self):
         return self.__up_to
+
+    @property
+    def up_from(self):
+        return self.__up_from
+
+    @up_from.setter
+    def up_from(self, value):
+        self.__up_from = value
 
     @property
     def number(self):
@@ -160,13 +169,20 @@ class WaveOptionsGeneratorCustom5(WaveOptionsGenerator):
     def populate(self) -> set:
         checked = set()
 
-        for i in range(0, self.up_to):
-            for j in range(0, self.up_to):
-                for k in range(0, self.up_to):
-                    for l in range(0, self.up_to):
-                        for m in range(0, self.up_to):
+        start = self.up_from
+        end = self.up_to
+
+        print(f"start: {start}, end: {end}")
+
+        for i in range(start, end):
+            for j in range(start, end):
+                for k in range(start, end):
+                    for l in range(start, end):
+                        for m in range(start, end):
                             wave_options = WaveOptions(i, j, k, l, m)
                             checked.add(wave_options)
+
+        self.options = checked
         return checked
 
 

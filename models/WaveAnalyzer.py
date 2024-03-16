@@ -201,11 +201,11 @@ class WaveAnalyzer:
                 print("Wave 5 has no End in Data")
             return False
 
-        lows_slice = self.lows[wave4.low_idx : wave5.high_idx]
-        if lows_slice.size > 0 and wave4.low > np.min(lows_slice):
-            if self.verbose:
-                print("Low of Wave 4 higher than a low between Wave 4 and Wave 5")
-            return False
+        # lows_slice = self.lows[wave4.low_idx : wave5.high_idx]
+        # if lows_slice.size > 0 and wave4.low > np.min(lows_slice):
+        #     if self.verbose:
+        #         print("Low of Wave 4 higher than a low between Wave 4 and Wave 5")
+        #     return False
 
         return [wave1, wave2, wave3, wave4, wave5]
 
